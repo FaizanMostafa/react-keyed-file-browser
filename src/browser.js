@@ -33,6 +33,7 @@ function getItemProps(file, browserProps) {
     isRenaming: browserProps.activeAction === 'rename' && browserProps.actionTargets.includes(file.key),
     isDeleting: browserProps.activeAction === 'delete' && browserProps.actionTargets.includes(file.key),
     isDraft: !!file.draft,
+    isFileDraft: !!file.fileDraft,
   }
 }
 
@@ -83,6 +84,7 @@ class RawFileBrowser extends React.Component {
 
     onCreateFiles: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
     onCreateFolder: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
+    onCreateFile: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
     onMoveFile: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
     onMoveFolder: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
     onRenameFile: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
@@ -172,14 +174,9 @@ class RawFileBrowser extends React.Component {
 
   // item manipulation
   createFiles = (files, prefix) => {
+    prefix = prefix.slice(prefix.indexOf('/')+1, prefix.length)
     this.setState(prevState => {
       const stateChanges = { selection: [] }
-      if (prefix) {
-        stateChanges.openFolders = {
-          ...prevState.openFolders,
-          [prefix]: true,
-        }
-      }
       return stateChanges
     }, () => {
       this.props.onCreateFiles(files, prefix)
@@ -193,6 +190,16 @@ class RawFileBrowser extends React.Component {
       selection: [key],
     }, () => {
       this.props.onCreateFolder(key)
+    })
+  }
+
+  createFile = (key) => {
+    this.setState({
+      activeAction: null,
+      actionTargets: [],
+      selection: [key],
+    }, () => {
+      this.props.onCreateFile(key)
     })
   }
 
@@ -439,6 +446,21 @@ class RawFileBrowser extends React.Component {
       return stateChanges
     })
   }
+  handleActionBarAddFileClick = (event) => {
+    event.preventDefault()
+    // if (this.state.activeAction === 'createFile') {
+    //   return
+    // }
+    this.setState(prevState => {
+      let addKey = 'filename'
+      const stateChanges = {
+        actionTargets: [addKey],
+        activeAction: 'createFile',
+        selection: [addKey],
+      }
+      return stateChanges
+    })
+  }
   handleActionBarDownloadClick = (event) => {
     event.preventDefault()
     this.downloadFile(this.state.selection)
@@ -480,6 +502,7 @@ class RawFileBrowser extends React.Component {
       // item manipulation
       createFiles: this.props.onCreateFiles ? this.createFiles : undefined,
       createFolder: this.props.onCreateFolder ? this.createFolder : undefined,
+      createFile: this.props.onCreateFile ? this.createFile : undefined,
       renameFile: this.props.onRenameFile ? this.renameFile : undefined,
       renameFolder: this.props.onRenameFolder ? this.renameFolder : undefined,
       moveFile: this.props.onMoveFile ? this.moveFile : undefined,
@@ -496,7 +519,7 @@ class RawFileBrowser extends React.Component {
       icons, canFilter,
       filterRendererProps, filterRenderer: FilterRenderer,
       actionRenderer: ActionRenderer,
-      onCreateFolder, onRenameFile, onRenameFolder,
+      onCreateFolder, onCreateFile, onRenameFile, onRenameFolder,
       onDeleteFile, onDeleteFolder, onDownloadFile,
     } = this.props
     const browserProps = this.getBrowserProps()
@@ -524,6 +547,9 @@ class RawFileBrowser extends React.Component {
 
         canCreateFolder={typeof onCreateFolder === 'function'}
         onCreateFolder={this.handleActionBarAddFolderClick}
+
+        canCreateFile={typeof onCreateFile === 'function'}
+        onCreateFile={this.handleActionBarAddFileClick}
 
         canRenameFile={typeof onRenameFile === 'function'}
         onRenameFile={this.handleActionBarRenameClick}
@@ -614,6 +640,13 @@ class RawFileBrowser extends React.Component {
         key: this.state.actionTargets[0],
         size: 0,
         draft: true,
+      })
+    }
+    if (this.state.activeAction === 'createFile') {
+      files.push({
+        key: this.state.actionTargets[0],
+        size: 0,
+        fileDraft: true,
       })
     }
     if (this.state.nameFilter) {

@@ -18,7 +18,7 @@ class RawListThumbnailFile extends BaseFile {
   render() {
     const {
       thumbnail_url: thumbnailUrl, action, url,
-      isDragging, isRenaming, isSelected, isSelectable, isOver, isDeleting,
+      isDragging, isRenaming, isSelected, isSelectable, isFileDraft, isOver, isDeleting,
       showName, showSize, showModified, browserProps, connectDragPreview,
     } = this.props
 
@@ -49,7 +49,7 @@ class RawListThumbnailFile extends BaseFile {
             {this.getName()}
           </ConfirmDeletionRenderer>
         )
-      } else if (!inAction && isRenaming) {
+      } else if ((!inAction && isRenaming) || isFileDraft) {
         name = (
           <form className="renaming" onSubmit={this.handleRenameSubmit}>
             <input

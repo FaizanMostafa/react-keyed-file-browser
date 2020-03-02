@@ -11,6 +11,9 @@ const Actions = (props) => {
     canCreateFolder,
     onCreateFolder,
 
+    canCreateFile,
+    onCreateFile,
+
     canRenameFile,
     onRenameFile,
 
@@ -151,7 +154,21 @@ const Actions = (props) => {
       }
     }
   } else {
-    // Nothing selected: We're in the 'root' folder. Only allowed action is adding a folder.
+    // Nothing selected: We're in the 'root' folder. Only allowed action is adding a folder and file.
+    if (canCreateFile && !nameFilter) {
+      actions.push(
+        <li key="action-add-folder">
+          <a
+            onClick={onCreateFile}
+            href="#"
+            role="button"
+          >
+            {icons.File}
+            {/* &nbsp;Add File */}
+          </a>
+        </li>
+      )
+    }
     if (canCreateFolder && !nameFilter) {
       actions.push(
         <li key="action-add-folder">

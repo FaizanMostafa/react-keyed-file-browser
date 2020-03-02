@@ -10,7 +10,7 @@ import { fileSize } from './utils.js'
 class RawTableFile extends BaseFile {
   render() {
     const {
-      isDragging, isDeleting, isRenaming, isOver, isSelected,
+      isDragging, isDeleting, isRenaming, isFileDraft, isOver, isSelected,
       action, url, browserProps, connectDragPreview,
       depth, size, modified,
     } = this.props
@@ -32,7 +32,7 @@ class RawTableFile extends BaseFile {
           {this.getName()}
         </ConfirmDeletionRenderer>
       )
-    } else if (!inAction && isRenaming) {
+    } else if ((!inAction && isRenaming) || isFileDraft) {
       name = (
         <form className="renaming" onSubmit={this.handleRenameSubmit}>
           {icon}
